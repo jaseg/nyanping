@@ -1,0 +1,31 @@
+#!/usr/bin/env python3
+import time
+
+import mpv
+import ping
+
+def nyanping(destination):
+    p = mpv.MPV(ytdl=True)
+    p.play('https://www.youtube.com/watch?v=QH2-TGUlwu4')
+    p.loop = 'inf'
+
+    while True:
+        time.sleep(0.1)
+        delay = ping.do_one(destination, 3.0)
+        print(delay)
+        if delay is None: # timeout
+            p.pause = True
+            continue
+        else:
+            p.pause = False
+            p.speed = 1/(1 + 3.3*delay)
+            p.command('show-text', f'{delay*1000:3f}ms')
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('destination')
+    args = parser.parse_args()
+
+    nyanping(args.destination)
+
