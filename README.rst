@@ -6,18 +6,18 @@ Nyanping is an audio-visual ping utility that you can use when you need to diagn
 Usage
 -----
 
-```
-$ nyanping heise.de
-```
+.. code:: shell
+
+        $ nyanping heise.de
 
 Pitch and speed will be proportional to the ping latency. In case of a timeout, the video pauses and resumes when connectivity is restored.
 
 Installation
 ------------
 
-```
-$ pip install nyanping
-```
+.. code:: shell
+
+        $ pip install nyanping
 
 Requirements
 ------------
