@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 setup(
     name = 'nyanping',
-    version = '0.0.2',
+    version = '0.0.3',
     py_modules = ['ping'],
     scripts = ['nyanping'],
     description = ('Improved graphical ping tool'),

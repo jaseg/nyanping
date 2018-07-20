@@ -1,31 +1,49 @@
 #!/usr/bin/env python3
 import time
+import socket
 
 import mpv
 import ping
 
-def nyanping(destination):
+def nyanping(destination, interval=0.1, timeout=3.0):
     p = mpv.MPV(ytdl=True)
     p.play('https://www.youtube.com/watch?v=QH2-TGUlwu4')
     p.loop = 'inf'
+    print('Waiting for video to load...')
+    p.audio_pitch_correction = False
+    p.fullscreen = True
 
-    while True:
-        time.sleep(0.1)
-        delay = ping.do_one(destination, 3.0)
-        print(delay)
-        if delay is None: # timeout
+    @p.on_key_press('q')
+    def quit():
+        p.quit()
+
+    p.wait_for_property('core-idle', lambda idle: not idle) # Wait for youtube-dl to do its thing and mpv to open the stream
+    while p.filename: # filename gets reset if the player quits or the window is closed
+        time.sleep(interval)
+        try:
+            delay = ping.do_one(destination, timeout)
+            print(f'{destination}: {delay*1000:.3f}ms')
+            if delay is None: # timeout
+                p.pause = True
+                continue
+            else:
+                p.pause = False
+                p.speed = 1/(1 + 3.3*delay)
+                p.command('show-text', f'{delay*1000:.1f}ms')
+        except KeyboardInterrupt:
+            break
+        except:
             p.pause = True
             continue
-        else:
-            p.pause = False
-            p.speed = 1/(1 + 3.3*delay)
-            p.command('show-text', f'{delay*1000:3f}ms')
+    p.terminate()
 
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('destination')
+    parser.add_argument('-W', '--timeout', type=float, default=3.0, help='Time to wait for a response in floating-point seconds')
+    parser.add_argument('-i', '--interval', type=float, default=0.1, help='Interval between requests in floating-point seconds')
     args = parser.parse_args()
 
-    nyanping(args.destination)
+    nyanping(socket.gethostbyname(args.destination), interval=args.interval, timeout=args.timeout)
 
